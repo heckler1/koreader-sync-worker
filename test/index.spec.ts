@@ -1,4 +1,4 @@
-import { SELF } from 'cloudflare:test';
+import { env, SELF } from 'cloudflare:test';
 import { describe, it, expect } from 'vitest';
 
 const BASE = 'https://example.com';
@@ -7,48 +7,25 @@ function authHeaders(username = 'testuser', key = 'testpass') {
 	return { 'x-auth-user': username, 'x-auth-key': key };
 }
 
-async function createUser(username = 'testuser', password = 'testpass') {
-	return SELF.fetch(`${BASE}/users/create`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ username, password }),
-	});
+async function seedUser(username: string, userkey: string) {
+	await env.KV.put(`user:${username}`, JSON.stringify({ username, userkey }));
 }
 
 describe('POST /users/create', () => {
-	it('creates a new user', async () => {
-		const res = await createUser();
-		expect(res.status).toBe(201);
-		expect(await res.json()).toEqual({ username: 'testuser' });
-	});
-
-	it('rejects duplicate username', async () => {
-		await createUser('dupuser', 'pass1');
-		const res = await createUser('dupuser', 'pass2');
-		expect(res.status).toBe(409);
-	});
-
-	it('rejects non-JSON body', async () => {
-		const res = await SELF.fetch(`${BASE}/users/create`, {
-			method: 'POST',
-			body: 'not json',
-		});
-		expect(res.status).toBe(400);
-	});
-
-	it('rejects missing fields', async () => {
+	it('returns 403 — registration is disabled', async () => {
 		const res = await SELF.fetch(`${BASE}/users/create`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ username: 'nopass' }),
+			body: JSON.stringify({ username: 'newuser', password: 'pass' }),
 		});
-		expect(res.status).toBe(400);
+		expect(res.status).toBe(403);
+		expect(await res.text()).toContain('disabled');
 	});
 });
 
 describe('GET /users/auth', () => {
 	it('authorizes valid credentials', async () => {
-		await createUser('authuser', 'authpass');
+		await seedUser('authuser', 'authpass');
 		const res = await SELF.fetch(`${BASE}/users/auth`, {
 			headers: authHeaders('authuser', 'authpass'),
 		});
@@ -69,7 +46,7 @@ describe('GET /users/auth', () => {
 	});
 
 	it('rejects wrong password', async () => {
-		await createUser('wrongpwuser', 'right');
+		await seedUser('wrongpwuser', 'right');
 		const res = await SELF.fetch(`${BASE}/users/auth`, {
 			headers: authHeaders('wrongpwuser', 'wrong'),
 		});
@@ -79,7 +56,7 @@ describe('GET /users/auth', () => {
 
 describe('GET /syncs/progress/:document', () => {
 	it('returns empty object for unknown document', async () => {
-		await createUser('reader1', 'key1');
+		await seedUser('reader1', 'key1');
 		const res = await SELF.fetch(`${BASE}/syncs/progress/unknown-doc`, {
 			headers: authHeaders('reader1', 'key1'),
 		});
@@ -88,7 +65,7 @@ describe('GET /syncs/progress/:document', () => {
 	});
 
 	it('returns saved position after update', async () => {
-		await createUser('reader2', 'key2');
+		await seedUser('reader2', 'key2');
 		await SELF.fetch(`${BASE}/syncs/progress`, {
 			method: 'PUT',
 			headers: { ...authHeaders('reader2', 'key2'), 'Content-Type': 'application/json' },
@@ -122,7 +99,7 @@ describe('GET /syncs/progress/:document', () => {
 
 describe('PUT /syncs/progress', () => {
 	it('updates position and returns document + timestamp', async () => {
-		await createUser('writer1', 'wkey1');
+		await seedUser('writer1', 'wkey1');
 		const res = await SELF.fetch(`${BASE}/syncs/progress`, {
 			method: 'PUT',
 			headers: { ...authHeaders('writer1', 'wkey1'), 'Content-Type': 'application/json' },
@@ -141,7 +118,7 @@ describe('PUT /syncs/progress', () => {
 	});
 
 	it('rejects non-JSON body', async () => {
-		await createUser('writer2', 'wkey2');
+		await seedUser('writer2', 'wkey2');
 		const res = await SELF.fetch(`${BASE}/syncs/progress`, {
 			method: 'PUT',
 			headers: authHeaders('writer2', 'wkey2'),
@@ -151,7 +128,7 @@ describe('PUT /syncs/progress', () => {
 	});
 
 	it('rejects missing document field', async () => {
-		await createUser('writer3', 'wkey3');
+		await seedUser('writer3', 'wkey3');
 		const res = await SELF.fetch(`${BASE}/syncs/progress`, {
 			method: 'PUT',
 			headers: { ...authHeaders('writer3', 'wkey3'), 'Content-Type': 'application/json' },

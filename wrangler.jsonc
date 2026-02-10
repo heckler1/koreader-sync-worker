@@ -7,6 +7,9 @@
     "enabled": true,
   },
   "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "REGISTRATION_ENABLED": "false"
+  },
   "kv_namespaces": [
     {
       "binding": "KV",

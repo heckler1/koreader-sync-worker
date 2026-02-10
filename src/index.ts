@@ -146,7 +146,7 @@ export default {
 
       // POST /users/create
       if (pathname === "/users/create" && method === "POST") {
-        return await handleRegister(env.KV, request);
+        return await handleRegister(env.KV, request, env.REGISTRATION_ENABLED);
       }
 
       // GET /users/auth
@@ -182,7 +182,12 @@ export default {
 async function handleRegister(
   kv: KVNamespace,
   request: Request,
+  registrationEnabled: string,
 ): Promise<Response> {
+  if (registrationEnabled !== "true") {
+    return textResponse("User registration is disabled.", 403);
+  }
+
   const contentType = request.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) {
     return textResponse("Invalid request", 400);
