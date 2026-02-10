@@ -161,6 +161,18 @@ describe('PUT /syncs/progress', () => {
 	});
 });
 
+describe('GET /', () => {
+	it('returns the landing page as HTML', async () => {
+		const res = await SELF.fetch(`${BASE}/`);
+		expect(res.status).toBe(200);
+		expect(res.headers.get('content-type')).toBe('text/html; charset=utf-8');
+		const html = await res.text();
+		expect(html).toContain('KOReader Sync Server');
+		expect(html).toContain('/users/create');
+		expect(html).toContain('/syncs/progress');
+	});
+});
+
 describe('routing', () => {
 	it('returns 404 for unknown paths', async () => {
 		const res = await SELF.fetch(`${BASE}/nope`);

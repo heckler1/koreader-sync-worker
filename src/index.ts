@@ -2,6 +2,8 @@
 // Reimplementation of koreader-flask.py
 // https://github.com/myelsukov/koreader-sync
 
+import { landingPage, favicon } from "./landing";
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface User {
@@ -134,6 +136,14 @@ export default {
     const method = request.method;
 
     try {
+      if (pathname === "/" && method === "GET") {
+        return landingPage();
+      }
+
+      if (pathname === "/favicon.ico" && method === "GET") {
+        return favicon();
+      }
+
       // POST /users/create
       if (pathname === "/users/create" && method === "POST") {
         return await handleRegister(env.KV, request);
