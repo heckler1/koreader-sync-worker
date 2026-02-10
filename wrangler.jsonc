@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "koreader-sync",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-02-10",
+  "observability": {
+    "enabled": true,
+  },
+  "compatibility_flags": ["nodejs_compat"],
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "a59ca8cdd9ef4fc2abfb683a6aff92d2",
+    },
+  ],
+}
