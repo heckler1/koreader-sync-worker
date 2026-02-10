@@ -12,7 +12,7 @@
   resolved "https://registry.yarnpkg.com/@cloudflare/unenv-preset/-/unenv-preset-2.12.1.tgz#6d4e67983f4cbca30415439151e397721b285c49"
   integrity sha512-tP/Wi+40aBJovonSNJSsS7aFJY0xjuckKplmzDs2Xat06BJ68B6iG7YDUWXJL8gNn0gqW7YC5WhlYhO3QbugQA==
 
-"@cloudflare/vitest-pool-workers@^0.12.4":
+"@cloudflare/vitest-pool-workers@^0.12.11":
   version "0.12.11"
   resolved "https://registry.yarnpkg.com/@cloudflare/vitest-pool-workers/-/vitest-pool-workers-0.12.11.tgz#02d1ec3259fdddd3a45d3b8b9de5d732be74c734"
   integrity sha512-pJkj5SP3us3zhaeMwln/66D8Rui/9Qkuv6cUj834h80gCYo8S5ENwaDyyD5NN6jY41QeffcDrmYaVTyrqxlB8w==
